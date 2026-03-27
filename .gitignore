@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+data/pension_pe.db
+data/downloads/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.DS_Store

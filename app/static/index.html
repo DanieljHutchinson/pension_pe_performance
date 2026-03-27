@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pension PE Performance</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <header>
+    <h1>Pension Fund PE Performance</h1>
+    <p class="subtitle">Private equity fund-level data from US public pension disclosures</p>
+  </header>
+
+  <section id="filters" class="card">
+    <h2>Filters</h2>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="f-pension">Pension Fund</label>
+        <select id="f-pension"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-gp">GP Name</label>
+        <input type="text" id="f-gp" placeholder="Search GP...">
+      </div>
+      <div class="filter-group">
+        <label for="f-strategy">Strategy</label>
+        <select id="f-strategy"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-vy-min">Vintage Min</label>
+        <input type="number" id="f-vy-min" min="1980" max="2030">
+      </div>
+      <div class="filter-group">
+        <label for="f-vy-max">Vintage Max</label>
+        <input type="number" id="f-vy-max" min="1980" max="2030">
+      </div>
+      <div class="filter-group">
+        <label for="f-irr-min">IRR Min (%)</label>
+        <input type="number" id="f-irr-min" step="0.1">
+      </div>
+      <div class="filter-group">
+        <label for="f-irr-max">IRR Max (%)</label>
+        <input type="number" id="f-irr-max" step="0.1">
+      </div>
+      <div class="filter-group">
+        <label for="f-tvpi-min">TVPI Min</label>
+        <input type="number" id="f-tvpi-min" step="0.01">
+      </div>
+      <div class="filter-group">
+        <label for="f-tvpi-max">TVPI Max</label>
+        <input type="number" id="f-tvpi-max" step="0.01">
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button onclick="applyFilters()">Apply</button>
+      <button onclick="clearFilters()" class="secondary">Clear</button>
+      <button onclick="exportCSV()" class="secondary">Export CSV</button>
+      <button onclick="exportJSON()" class="secondary">Export JSON</button>
+    </div>
+  </section>
+
+  <section id="stats" class="card">
+    <h2>Summary Statistics</h2>
+    <div id="stats-cards" class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="s-total">-</div><div class="stat-label">Total Funds</div></div>
+      <div class="stat-card"><div class="stat-value" id="s-med-irr">-</div><div class="stat-label">Median IRR</div></div>
+      <div class="stat-card"><div class="stat-value" id="s-mean-irr">-</div><div class="stat-label">Mean IRR</div></div>
+      <div class="stat-card"><div class="stat-value" id="s-med-tvpi">-</div><div class="stat-label">Median TVPI</div></div>
+      <div class="stat-card"><div class="stat-value" id="s-mean-tvpi">-</div><div class="stat-label">Mean TVPI</div></div>
+    </div>
+    <div class="stats-breakdown">
+      <div id="vintage-stats"></div>
+      <div id="strategy-stats"></div>
+    </div>
+  </section>
+
+  <section id="chart-section" class="card">
+    <h2>IRR vs TVPI</h2>
+    <canvas id="scatter-chart" height="300"></canvas>
+  </section>
+
+  <section id="table-section" class="card">
+    <h2>Fund Data <span id="table-count"></span></h2>
+    <div class="table-wrapper">
+      <table id="funds-table">
+        <thead>
+          <tr>
+            <th data-col="fund_name" class="sortable">Fund</th>
+            <th data-col="gp_name" class="sortable">GP</th>
+            <th data-col="pension_fund" class="sortable">Pension</th>
+            <th data-col="vintage_year" class="sortable">Vintage</th>
+            <th data-col="strategy" class="sortable">Strategy</th>
+            <th data-col="commitment_usd" class="sortable num">Commitment</th>
+            <th data-col="tvpi" class="sortable num">TVPI</th>
+            <th data-col="dpi" class="sortable num">DPI</th>
+            <th data-col="net_irr" class="sortable num">Net IRR</th>
+            <th data-col="as_of_date" class="sortable">As Of</th>
+          </tr>
+        </thead>
+        <tbody id="funds-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button id="prev-btn" onclick="prevPage()">Previous</button>
+      <span id="page-info"></span>
+      <button id="next-btn" onclick="nextPage()">Next</button>
+    </div>
+  </section>
+
+  <section id="upload-section" class="card">
+    <h2>Manual Upload</h2>
+    <form id="upload-form" onsubmit="handleUpload(event)">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="u-file">CSV/Excel File</label>
+          <input type="file" id="u-file" accept=".csv,.xlsx,.xls" required>
+        </div>
+        <div class="filter-group">
+          <label for="u-pension">Pension Fund</label>
+          <input type="text" id="u-pension" required placeholder="e.g. CalPERS">
+        </div>
+        <div class="filter-group">
+          <label for="u-date">As-of Date</label>
+          <input type="date" id="u-date" required>
+        </div>
+      </div>
+      <button type="submit">Upload</button>
+      <span id="upload-status"></span>
+    </form>
+  </section>
+
+  <section id="refresh-section" class="card">
+    <h2>Data Refresh</h2>
+    <div class="filter-row">
+      <button onclick="refreshSource('calpers')">Refresh CalPERS</button>
+      <button onclick="refreshSource('all')">Refresh All</button>
+      <span id="refresh-status"></span>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
