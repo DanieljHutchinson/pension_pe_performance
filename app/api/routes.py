@@ -9,6 +9,7 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 from app.database import get_connection
 from app.export.exporter import export_csv, export_json
 from app.ingestion.calpers import CalPERSScraper
+from app.ingestion.sdcers import SDCERSScraper
 from app.ingestion.manual_upload import parse_upload
 from app.normalization.normalize import ingest_records
 from app.dedup.fuzzy_match import get_dedup_summary
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/api")
 
 SCRAPERS = {
     "calpers": CalPERSScraper,
+    "sdcers": SDCERSScraper,
 }
 
 VALID_SORT_COLS = {

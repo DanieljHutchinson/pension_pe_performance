@@ -7,11 +7,13 @@ import json
 
 from app.database import init_db
 from app.ingestion.calpers import CalPERSScraper
+from app.ingestion.sdcers import SDCERSScraper
 from app.normalization.normalize import ingest_records
 from app.export.exporter import export_csv, export_json
 
 SCRAPERS = {
     "calpers": CalPERSScraper,
+    "sdcers": SDCERSScraper,
 }
 
 

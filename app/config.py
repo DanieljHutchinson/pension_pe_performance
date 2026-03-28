@@ -34,6 +34,11 @@ SOURCES = {
         "url": "https://www.sib.wa.gov/docs/reports/quarterly/ir093024.pdf",
         "type": "pdf",
     },
+    "sdcers": {
+        "name": "SDCERS",
+        "url": "https://content.sdcers.org/wp-content/uploads/2025/03/stepstone-private-equity-full-performance-report-q2-2024.pdf",
+        "type": "pdf",
+    },
 }
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) PensionPEResearch/1.0"
